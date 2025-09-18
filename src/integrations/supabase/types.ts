@@ -14,7 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      baixas: {
+        Row: {
+          created_at: string
+          data_pagamento: string
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          id: string
+          observacoes: string | null
+          titulo_id: string
+          valor_pago: number
+        }
+        Insert: {
+          created_at?: string
+          data_pagamento: string
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          observacoes?: string | null
+          titulo_id: string
+          valor_pago: number
+        }
+        Update: {
+          created_at?: string
+          data_pagamento?: string
+          forma_pagamento?: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          observacoes?: string | null
+          titulo_id?: string
+          valor_pago?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "baixas_titulo_id_fkey"
+            columns: ["titulo_id"]
+            isOneToOne: false
+            referencedRelation: "titulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      titulos: {
+        Row: {
+          cliente_documento: string | null
+          cliente_email: string | null
+          cliente_nome: string
+          cliente_telefone: string | null
+          created_at: string
+          data_emissao: string
+          data_vencimento: string
+          descricao: string | null
+          id: string
+          numero_titulo: string
+          observacoes: string | null
+          status: Database["public"]["Enums"]["status_titulo"]
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          cliente_documento?: string | null
+          cliente_email?: string | null
+          cliente_nome: string
+          cliente_telefone?: string | null
+          created_at?: string
+          data_emissao?: string
+          data_vencimento: string
+          descricao?: string | null
+          id?: string
+          numero_titulo: string
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["status_titulo"]
+          updated_at?: string
+          valor: number
+        }
+        Update: {
+          cliente_documento?: string | null
+          cliente_email?: string | null
+          cliente_nome?: string
+          cliente_telefone?: string | null
+          created_at?: string
+          data_emissao?: string
+          data_vencimento?: string
+          descricao?: string | null
+          id?: string
+          numero_titulo?: string
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["status_titulo"]
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +111,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      forma_pagamento:
+        | "dinheiro"
+        | "cartao_credito"
+        | "cartao_debito"
+        | "pix"
+        | "transferencia"
+        | "boleto"
+        | "outros"
+      status_titulo: "pendente" | "pago" | "vencido" | "cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +246,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      forma_pagamento: [
+        "dinheiro",
+        "cartao_credito",
+        "cartao_debito",
+        "pix",
+        "transferencia",
+        "boleto",
+        "outros",
+      ],
+      status_titulo: ["pendente", "pago", "vencido", "cancelado"],
+    },
   },
 } as const
