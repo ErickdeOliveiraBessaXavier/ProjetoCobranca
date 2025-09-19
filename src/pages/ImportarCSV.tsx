@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ImportarCSV() {
   const [arquivo, setArquivo] = useState<File | null>(null);
@@ -24,6 +26,7 @@ export default function ImportarCSV() {
     erro: number;
     detalhes: Array<{ linha: number; erro: string }>;
   } | null>(null);
+  const { toast } = useToast();
 
   const handleArquivo = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -38,30 +41,105 @@ export default function ImportarCSV() {
     
     setCarregando(true);
     
-    // Simular processamento
-    setTimeout(() => {
-      setResultado({
-        sucesso: 15,
-        erro: 2,
-        detalhes: [
-          { linha: 3, erro: "Valor inválido: 'abc'" },
-          { linha: 8, erro: "Data de vencimento no formato incorreto" }
-        ]
+    try {
+      const text = await arquivo.text();
+      const linhas = text.split('\n');
+      const cabecalho = linhas[0].split(';');
+      
+      let sucesso = 0;
+      let erro = 0;
+      const detalhes: Array<{ linha: number; erro: string }> = [];
+      
+      for (let i = 1; i < linhas.length; i++) {
+        const linha = linhas[i].trim();
+        if (!linha) continue;
+        
+        try {
+          const valores = linha.split(';');
+          const dados: Record<string, string> = {};
+          
+          cabecalho.forEach((campo, index) => {
+            dados[campo] = valores[index] || '';
+          });
+          
+          // Validações básicas
+          if (!dados.NOME) {
+            throw new Error('Nome é obrigatório');
+          }
+          if (!dados.VL_TITULO && !dados.VL_SALDO) {
+            throw new Error('Valor do título é obrigatório');
+          }
+          if (!dados.DT_VENCIMENTO) {
+            throw new Error('Data de vencimento é obrigatória');
+          }
+          
+          // Converter data do formato DD/MM/AAAA para AAAA-MM-DD
+          const converterData = (dataStr: string) => {
+            if (!dataStr) return null;
+            const partes = dataStr.split('/');
+            if (partes.length === 3) {
+              return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+            }
+            return dataStr;
+          };
+          
+          // Preparar dados para inserção
+          const titulo = {
+            numero_titulo: dados.COD_TITULO || `AUTO-${Date.now()}-${i}`,
+            cliente_nome: dados.NOME,
+            cliente_documento: dados.CNPJ_CPF || null,
+            cliente_email: dados.EMAIL || null,
+            cliente_telefone: dados['FONE 1'] || null,
+            descricao: dados.DADOS_ADICIONAIS || null,
+            valor: parseFloat((dados.VL_TITULO || dados.VL_SALDO || '0').replace(',', '.')),
+            data_vencimento: converterData(dados.DT_VENCIMENTO),
+            data_emissao: converterData(dados.DT_GERACAO) || new Date().toISOString().split('T')[0],
+            status: 'pendente' as const
+          };
+          
+          const { error } = await supabase
+            .from('titulos')
+            .insert(titulo);
+          
+          if (error) {
+            throw new Error(error.message);
+          }
+          
+          sucesso++;
+        } catch (err) {
+          erro++;
+          detalhes.push({ 
+            linha: i + 1, 
+            erro: err instanceof Error ? err.message : 'Erro desconhecido' 
+          });
+        }
+      }
+      
+      setResultado({ sucesso, erro, detalhes });
+      
+      if (sucesso > 0) {
+        toast({
+          title: "Importação concluída",
+          description: `${sucesso} títulos importados com sucesso.`,
+        });
+      }
+      
+    } catch (err) {
+      toast({
+        title: "Erro na importação",
+        description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: "destructive",
       });
+    } finally {
       setCarregando(false);
-    }, 2000);
+    }
   };
 
   const baixarModelo = () => {
-    // Simular download do modelo CSV
-    const csvContent = "cliente,documento,email,valor,vencimento,descricao\nJoão Silva,12345678901,joao@email.com,1250.00,2024-01-15,Serviços de consultoria\nMaria Santos,98765432100,maria@email.com,850.00,2024-01-20,Desenvolvimento de website";
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'modelo-titulos.csv';
+    a.href = '/modelo_importacao.csv';
+    a.download = 'modelo_importacao.csv';
     a.click();
-    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -213,18 +291,21 @@ export default function ImportarCSV() {
               <div>
                 <h4 className="text-sm font-medium text-foreground">Campos obrigatórios:</h4>
                 <div className="flex flex-wrap gap-1 mt-2">
-                  <Badge variant="outline">cliente</Badge>
-                  <Badge variant="outline">valor</Badge>
-                  <Badge variant="outline">vencimento</Badge>
+                  <Badge variant="outline">NOME</Badge>
+                  <Badge variant="outline">VL_TITULO</Badge>
+                  <Badge variant="outline">DT_VENCIMENTO</Badge>
                 </div>
               </div>
 
               <div>
                 <h4 className="text-sm font-medium text-foreground">Campos opcionais:</h4>
                 <div className="flex flex-wrap gap-1 mt-2">
-                  <Badge variant="secondary">documento</Badge>
-                  <Badge variant="secondary">email</Badge>
-                  <Badge variant="secondary">descricao</Badge>
+                  <Badge variant="secondary">COD_TITULO</Badge>
+                  <Badge variant="secondary">CNPJ_CPF</Badge>
+                  <Badge variant="secondary">EMAIL</Badge>
+                  <Badge variant="secondary">FONE 1</Badge>
+                  <Badge variant="secondary">DT_GERACAO</Badge>
+                  <Badge variant="secondary">DADOS_ADICIONAIS</Badge>
                 </div>
               </div>
             </div>
@@ -234,8 +315,9 @@ export default function ImportarCSV() {
             <h3 className="font-semibold text-foreground mb-4">Dicas</h3>
             
             <div className="space-y-3 text-sm text-muted-foreground">
-              <p>• Use ponto como separador decimal (ex: 1250.50)</p>
-              <p>• Data no formato AAAA-MM-DD (ex: 2024-01-15)</p>
+              <p>• Use vírgula como separador decimal (ex: 1250,50)</p>
+              <p>• Data no formato DD/MM/AAAA (ex: 15/01/2024)</p>
+              <p>• Separador de campos: ponto e vírgula (;)</p>
               <p>• Codificação UTF-8 para caracteres especiais</p>
               <p>• Máximo de 1000 linhas por importação</p>
             </div>
