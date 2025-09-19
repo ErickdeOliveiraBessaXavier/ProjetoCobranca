@@ -54,52 +54,148 @@ export type Database = {
       }
       titulos: {
         Row: {
+          bairro: string | null
+          categoria: string | null
+          cep: string | null
+          cidade: string | null
           cliente_documento: string | null
           cliente_email: string | null
           cliente_nome: string
           cliente_telefone: string | null
+          cod_barra: string | null
+          cod_credor: string | null
+          cod_devedor: string | null
+          complemento: string | null
+          complemento1: string | null
+          complemento2: string | null
+          complemento3: string | null
+          contrato: string | null
           created_at: string
           data_emissao: string
+          data_programada: string | null
           data_vencimento: string
           descricao: string | null
+          endereco: string | null
+          estado: string | null
+          fone_2: string | null
+          fone_3: string | null
+          fone_obs1: string | null
+          fone_obs2: string | null
+          fone_obs3: string | null
+          gerente: string | null
           id: string
+          ie_rg: string | null
+          linha_digitavel: string | null
+          nosso_numero: string | null
+          numero: string | null
           numero_titulo: string
           observacoes: string | null
+          parcela: number | null
+          portador: string | null
+          score: number | null
           status: Database["public"]["Enums"]["status_titulo"]
+          tipo_negocio: string | null
+          tipo_titulo: string | null
+          tp_pessoa: string | null
           updated_at: string
           valor: number
+          valor_saldo: number | null
         }
         Insert: {
+          bairro?: string | null
+          categoria?: string | null
+          cep?: string | null
+          cidade?: string | null
           cliente_documento?: string | null
           cliente_email?: string | null
           cliente_nome: string
           cliente_telefone?: string | null
+          cod_barra?: string | null
+          cod_credor?: string | null
+          cod_devedor?: string | null
+          complemento?: string | null
+          complemento1?: string | null
+          complemento2?: string | null
+          complemento3?: string | null
+          contrato?: string | null
           created_at?: string
           data_emissao?: string
+          data_programada?: string | null
           data_vencimento: string
           descricao?: string | null
+          endereco?: string | null
+          estado?: string | null
+          fone_2?: string | null
+          fone_3?: string | null
+          fone_obs1?: string | null
+          fone_obs2?: string | null
+          fone_obs3?: string | null
+          gerente?: string | null
           id?: string
+          ie_rg?: string | null
+          linha_digitavel?: string | null
+          nosso_numero?: string | null
+          numero?: string | null
           numero_titulo: string
           observacoes?: string | null
+          parcela?: number | null
+          portador?: string | null
+          score?: number | null
           status?: Database["public"]["Enums"]["status_titulo"]
+          tipo_negocio?: string | null
+          tipo_titulo?: string | null
+          tp_pessoa?: string | null
           updated_at?: string
           valor: number
+          valor_saldo?: number | null
         }
         Update: {
+          bairro?: string | null
+          categoria?: string | null
+          cep?: string | null
+          cidade?: string | null
           cliente_documento?: string | null
           cliente_email?: string | null
           cliente_nome?: string
           cliente_telefone?: string | null
+          cod_barra?: string | null
+          cod_credor?: string | null
+          cod_devedor?: string | null
+          complemento?: string | null
+          complemento1?: string | null
+          complemento2?: string | null
+          complemento3?: string | null
+          contrato?: string | null
           created_at?: string
           data_emissao?: string
+          data_programada?: string | null
           data_vencimento?: string
           descricao?: string | null
+          endereco?: string | null
+          estado?: string | null
+          fone_2?: string | null
+          fone_3?: string | null
+          fone_obs1?: string | null
+          fone_obs2?: string | null
+          fone_obs3?: string | null
+          gerente?: string | null
           id?: string
+          ie_rg?: string | null
+          linha_digitavel?: string | null
+          nosso_numero?: string | null
+          numero?: string | null
           numero_titulo?: string
           observacoes?: string | null
+          parcela?: number | null
+          portador?: string | null
+          score?: number | null
           status?: Database["public"]["Enums"]["status_titulo"]
+          tipo_negocio?: string | null
+          tipo_titulo?: string | null
+          tp_pessoa?: string | null
           updated_at?: string
           valor?: number
+          valor_saldo?: number | null
         }
         Relationships: []
       }
